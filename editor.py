@@ -7,6 +7,7 @@ class Editor:
         self.videoName = ''
         self.videoDuration = 0
         self.numberCuts = 0
+        self.ExtractAudio = False
 
     def setVideoPath(self, path):
         if path != "":
@@ -17,6 +18,9 @@ class Editor:
     def setVideoCuts(self, cuts):
         if cuts != "":
             self.numberCuts = cuts
+
+    def setExtractAudio(self, status):
+        self.ExtractAudio = status
 
     def setVideoName(self, name):
         self.VideoName = name
@@ -39,16 +43,23 @@ class Editor:
 
             contador = 0
             timer = 0
-            while contador < self.numberCuts:
-                if contador == self.numberCuts - 1:
-                    ffmpeg_extract_subclip(self.videoPath, timer, self.videoDuration, targetname="VIDEO_CUT_{}.mp4".format(contador))
-                else:
-                    ffmpeg_extract_subclip(self.videoPath, timer, intervalo+timer, targetname="VIDEO_CUT_{}.mp4".format(contador))
+            if self.numberCuts > 0:
+                while contador < self.numberCuts:
+                    if contador == self.numberCuts - 1:
+                        ffmpeg_extract_subclip(self.videoPath, timer, self.videoDuration, targetname="VIDEO_CUT_{}.mp4".format(contador))
+                    else:
+                        ffmpeg_extract_subclip(self.videoPath, timer, intervalo+timer, targetname="VIDEO_CUT_{}.mp4".format(contador))
 
-                timer = timer + intervalo
-                contador = contador + 1
+                    timer = timer + intervalo
+                    contador = contador + 1
+
+            if self.ExtractAudio == True:
+                filename, ext = os.path.splitext(self.videoPath)
+                clip = VideoFileClip(self.videoPath)
+                clip.audio.write_audiofile(f"AUDIO.mp3")
 
             return True
+
         except:
             print('teste exepct')
             return False
